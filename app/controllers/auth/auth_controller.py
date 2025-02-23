@@ -3,7 +3,9 @@ from app.status_code import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_500_IN
 from app.models.user import User
 import validators
 from app.extension import db, bcrypt
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+)
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
@@ -83,9 +85,11 @@ def login_user():
             check_password = bcrypt.check_password_hash(user.password, password)
             if check_password:
                 access_token = create_access_token(identity=user.id)
+                refresh_token = create_refresh_token(identity=str(user.id))
                 return jsonify({
                     'message': f'Welcome back {user.get_full_name()}',
                     'access_token': access_token,   
+                    'refresh_token': refresh_token,
                     'user': {
                         "id": user.id,
                         "first_name": user.first_name,
@@ -103,3 +107,20 @@ def login_user():
             return jsonify({'message': 'User does not exist'}), HTTP_401_UNAUTHORIZED
     except Exception as e:
         return jsonify({'message': str(e)}), HTTP_500_INTERNAL_SERVER_ERROR 
+    
+# Refresh Token
+@auth.route('/token/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh_token():
+    try:
+        identity = get_jwt_identity()
+
+        # Ensure identity is a string
+        if not isinstance(identity, str):
+            return jsonify({'message': 'Identity must be a string'}), HTTP_400_BAD_REQUEST
+
+        access_token = create_access_token(identity=identity)  
+        return jsonify({'access_token': access_token}), HTTP_200_OK
+
+    except Exception as e:
+        return jsonify({'message': str(e)}), HTTP_500_INTERNAL_SERVER_ERROR
