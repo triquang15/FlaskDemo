@@ -1,4 +1,4 @@
-from extension import db
+from app.extension import db
 from datetime import datetime
 
 class User(db.Model):
@@ -6,8 +6,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False, unique=True)
-    contact = db.Column(db.String(50), unique=True, nullable=False, unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    contact = db.Column(db.String(50), unique=True, nullable=False)
     image = db.Column(db.String(255), nullable=True)
     password = db.Column(db.Text, nullable=False)
     biography = db.Column(db.Text, nullable=True)
@@ -16,6 +16,7 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.now)
     
     def __init__(self, first_name, last_name, email, contact, password, biography, user_type, image=None):
+        super(User, self).__init__()
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
