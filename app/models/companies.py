@@ -21,3 +21,14 @@ class Company(db.Model):
   
     def __repr__(self):
         return f"{self.name} - {self.origin}" 
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'origin': self.origin,
+            'description': self.description,
+            'user_id': self.user_id,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+        }

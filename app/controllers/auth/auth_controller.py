@@ -9,7 +9,7 @@ from flask_jwt_extended import (
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
-#User Registration
+# 1.User Registration
 @auth.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
@@ -70,7 +70,7 @@ def register_user():
         db.session.close()
         return jsonify({'message': 'User registration failed'}), HTTP_500_INTERNAL_SERVER_ERROR
 
-#User Login
+# 2.User Login
 @auth.route('/login', methods=['POST'])
 def login_user():
     data = request.get_json()
@@ -108,7 +108,7 @@ def login_user():
     except Exception as e:
         return jsonify({'message': str(e)}), HTTP_500_INTERNAL_SERVER_ERROR 
     
-# Refresh Token
+# 3.Refresh Token
 @auth.route('/token/refresh', methods=['POST'])
 @jwt_required(refresh=True)
 def refresh_token():

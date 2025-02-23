@@ -37,3 +37,20 @@ class Book(db.Model):
     def __repr__(self):
         return f"Book: {self.title}"
         
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'pages': self.pages,
+            'price': self.price,
+            'price_unit': self.price_unit,
+            'published_at': self.published_at.strftime('%Y-%m-%d') if self.published_at else None,
+            'isbn': self.isbn,
+            'genre': self.genre,
+            'description': self.description,
+            'image': self.image,
+            'user_id': self.user_id,
+            'company_id': self.company_id,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+        }

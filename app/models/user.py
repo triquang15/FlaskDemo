@@ -30,3 +30,31 @@ class User(db.Model):
         return f"{self.first_name} {self.last_name}"
         
     
+     # ✅ Add this method
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "contact": self.contact,
+            "image": self.image,
+            "biography": self.biography,
+            "user_type": self.user_type,
+            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None,
+            "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S") if self.updated_at else None
+        }
+        
+        # ✅ Add this method to include relationships
+    def to_dict_with_relationships(self):
+        return {
+            'id': self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            'email': self.email,
+            'user_type': self.user_type,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'updated_at': self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
+            'companies': [company.to_dict() for company in self.companies],  # Related Companies
+            'books': [book.to_dict() for book in self.books]  # Related Books
+        }
