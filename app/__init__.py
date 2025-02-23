@@ -1,5 +1,6 @@
 from flask import Flask
 from app.extension import db, migrate
+from app.controllers.auth.auth_controller import auth
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -10,6 +11,9 @@ migrate.init_app(app, db)
 from app.models.user import User
 from app.models.companies import Company
 from app.models.books import Book
+
+# Register blueprints
+app.register_blueprint(auth)
 
 @app.route('/')
 def home():
