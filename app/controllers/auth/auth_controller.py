@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
-from app.status_code import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_201_CREATED
+from app.status_code import HTTP_400_BAD_REQUEST, HTTP_409_CONFLICT, HTTP_500_INTERNAL_SERVER_ERROR, HTTP_401_UNAUTHORIZED,HTTP_201_CREATED, HTTP_200_OK
 from app.models.user import User
 import validators
 from app.extension import db, bcrypt
+from flask_jwt_extended import create_access_token
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
@@ -63,5 +64,42 @@ def register_user():
         db.session.rollback()
         return jsonify({'message': str(e)}), HTTP_500_INTERNAL_SERVER_ERROR
     
-    
-    
+    finally:
+        db.session.close()
+        return jsonify({'message': 'User registration failed'}), HTTP_500_INTERNAL_SERVER_ERROR
+
+#User Login
+@auth.route('/login', methods=['POST'])
+def login_user():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+        
+    try:
+        if not email or not password:
+            return jsonify({'message': 'All fields are required'}), HTTP_400_BAD_REQUEST
+        user = User.query.filter_by(email=email).first()
+        if user:
+            check_password = bcrypt.check_password_hash(user.password, password)
+            if check_password:
+                access_token = create_access_token(identity=user.id)
+                return jsonify({
+                    'message': f'Welcome back {user.get_full_name()}',
+                    'access_token': access_token,   
+                    'user': {
+                        "id": user.id,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "email": user.email,
+                        "contact": user.contact,
+                        "type": user.user_type,
+                        "biography": user.biography,
+                        "created_at": user.created_at,  
+                    }
+                }), HTTP_200_OK
+            else:
+                return jsonify({'message': 'Invalid email or password'}), HTTP_400_BAD_REQUEST
+        else:
+            return jsonify({'message': 'User does not exist'}), HTTP_401_UNAUTHORIZED
+    except Exception as e:
+        return jsonify({'message': str(e)}), HTTP_500_INTERNAL_SERVER_ERROR 
